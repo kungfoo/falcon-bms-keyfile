@@ -1,0 +1,11 @@
+[package]
+name = "falcon-key-file"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log = "*"
+levenshtein = "1.0.5"
+
+[dev-dependencies]
+env_logger = "*"
