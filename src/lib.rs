@@ -175,7 +175,7 @@ fn parse_key_code(number: u16) -> String {
         26 => "[",
         27 => "]",
         28 => "RETURN",
-        29 => "`",
+        29 => "LEFT CTRL",
         30 => "a",
         31 => "s",
         32 => "d",
@@ -188,6 +188,7 @@ fn parse_key_code(number: u16) -> String {
         39 => ";",
         40 => "'",
         41 => "`",
+        42 => "LEFT SHIFT",
         43 => "\\",
         44 => "z",
         45 => "x",
@@ -199,7 +200,9 @@ fn parse_key_code(number: u16) -> String {
         51 => ",",
         52 => ".",
         53 => "/",
-        55 => "MULTIPLY",
+        54 => "RIGHT SHIFT",
+        55 => "NUMPAD ASTERISK",
+        56 => "LEFT ALT",
         57 => "SPACE",
         58 => "CAPSLOCK",
         59 => "F1",
@@ -214,28 +217,29 @@ fn parse_key_code(number: u16) -> String {
         68 => "F10",
         69 => "NUMLOCK",
         70 => "SCROLLOCK",
-        71 => "NUMPAD7",
-        72 => "NUMPAD8",
-        73 => "NUMPAD9",
-        74 => "SUBTRACT",
-        75 => "NUMPAD4",
-        76 => "NUMPAD5",
-        77 => "NUMPAD6",
-        78 => "ADD",
-        79 => "NUMPAD1",
-        80 => "NUMPAD2",
-        81 => "NUMPAD3",
-        82 => "NUMPAD0",
-        83 => "DECIMAL",
+        71 => "NUMPAD 7",
+        72 => "NUMPAD 8",
+        73 => "NUMPAD 9",
+        74 => "NUMPAD MINUS",
+        75 => "NUMPAD 4",
+        76 => "NUMPAD 5",
+        77 => "NUMPAD 6",
+        78 => "NUMPAD PLUS",
+        79 => "NUMPAD 1",
+        80 => "NUMPAD 2",
+        81 => "NUMPAD 3",
+        82 => "NUMPAD 0",
+        83 => "NUMPAD DOT/DECIMAL",
         87 => "F11",
         88 => "F12",
         100 => "F13",
         101 => "F14",
         102 => "F15",
-        156 => "NUMPADENTER",
-        157 => "RCONTROL",
-        181 => "DIVIDE",
+        156 => "NUMPAD ENTER",
+        157 => "RIGHT CONTROL",
+        181 => "NUMPAD DIVIDE",
         183 => "SYSRQ",
+        184 => "RIGHT ALT",
         199 => "HOME",
         200 => "UP",
         201 => "PAGEUP",
@@ -249,6 +253,7 @@ fn parse_key_code(number: u16) -> String {
         219 => "LWIN",
         220 => "RWIN",
         221 => "APPS",
+        // these are special in keyfiles
         0 => "",
         0xFFFF => "",
         e => todo!("Unmatched key code {}", e),
@@ -294,6 +299,9 @@ mod falcon_key_file {
         let callback = result.callback("OTWBalanceIVCvsAIDown").unwrap();
         assert_eq!(callback.readable_key_code, "[");
 
+        let callback = result.callback("SimICPMark").unwrap();
+        assert_eq!(callback.readable_key_code, "NUMPAD 7");
+
         // let's find one with multiple modifiers
         let callback = result.callback("AFElevatorUp").unwrap();
         assert_eq!(callback.readable_key_code, "UP");
@@ -301,6 +309,10 @@ mod falcon_key_file {
             callback.modifiers,
             vec![Modifier::LSHIFT, Modifier::LCONTROL]
         );
+
+        let callback = result.callback("SimCBEOSB_18L").unwrap();
+        assert_eq!(callback.readable_key_code, "NUMPAD 8");
+        assert_eq!(callback.modifiers, vec![Modifier::LCONTROL, Modifier::LALT]);
 
         // let's find a combo key
         let callback = result.callback("SimPilotToggle").unwrap();
