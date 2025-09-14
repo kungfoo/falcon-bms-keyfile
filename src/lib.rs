@@ -123,8 +123,7 @@ fn convert_number(number: &str) -> u16 {
     let number = number.to_lowercase();
     if number.starts_with("0x") {
         let without_prefix = number.trim_start_matches("0x");
-        return u32::from_str_radix(without_prefix, 16).expect("Expected hex key code to be an u16")
-            as u16;
+        return u16::from_str_radix(without_prefix, 16).expect("Expected hex key code to be an u16");
     }
     number
         .parse()
