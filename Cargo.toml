@@ -7,6 +7,7 @@ publish = false
 [dependencies]
 log = "*"
 levenshtein = "1.0.5"
+enigo = "0.6.1"
 
 [dev-dependencies]
 env_logger = "*"
