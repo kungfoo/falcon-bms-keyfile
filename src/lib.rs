@@ -75,10 +75,7 @@ impl FalconKeyfile {
     }
 
     pub fn callback(&self, callback_name: &str) -> Option<Callback> {
-        match self.callbacks.get(callback_name) {
-            Some(x) => Some(x.clone()),
-            None => None,
-        }
+        self.callbacks.get(callback_name).cloned()
     }
 
     pub fn describe(&self) -> String {
@@ -91,9 +88,9 @@ impl FalconKeyfile {
 
     pub fn propose_callback_names(&self, query: String, count: usize) -> Vec<String> {
         let mut names: Vec<_> = self.callbacks.keys().cloned().collect();
-        names.sort_by(|a, b| levenshtein(&query, a).cmp(&levenshtein(&query, b)));
+        names.sort_by_key(|a| levenshtein(&query, a));
 
-        return names.iter().take(count).map(|s| String::from(s)).collect();
+        names.iter().take(count).map(String::from).collect()
     }
 }
 
@@ -129,10 +126,8 @@ fn convert_number(number: &str) -> u16 {
         return u32::from_str_radix(without_prefix, 16).expect("Expected hex key code to be an u16")
             as u16;
     }
-    number.parse().expect(&format!(
-        "Expected key code number to be u32 but was '{}'",
-        number
-    ))
+    number.parse().unwrap_or_else(|_| panic!("Expected key code number to be u32 but was '{}'",
+        number))
 }
 
 fn parse_modifiers(number: u16) -> Vec<Modifier> {
@@ -150,7 +145,7 @@ fn parse_modifiers(number: u16) -> Vec<Modifier> {
 }
 
 fn parse_key_code(number: u16) -> Key {
-    return match number {
+    match number {
         // these are maric unicorns in keyfiles
         0xFFFF => Key::Unknown,
         0 => Key::Unknown,
@@ -262,7 +257,7 @@ fn parse_key_code(number: u16) -> Key {
             error!("Unmatched keycode in keyfile: {}", e);
             Key::Unknown
         }
-    };
+    }
 }
 
 /// Keys that are used in falcon bms key files
