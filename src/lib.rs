@@ -1,4 +1,3 @@
-use enigo::Key;
 use levenshtein::levenshtein;
 use log::*;
 use std::collections::HashMap;
@@ -153,9 +152,9 @@ fn parse_modifiers(number: u16) -> Vec<Modifier> {
 fn parse_key_code(number: u16) -> Key {
     return match number {
         // these are maric unicorns in keyfiles
-        0 => Key::Other(0),
-        0xFFFF => Key::Other(0),
-        // normal ones start here:
+        0xFFFF => Key::Unknown,
+        0 => Key::Unknown,
+        // normal ones start here
         1 => Key::Escape,
         2 => Key::Num1,
         3 => Key::Num2,
@@ -167,8 +166,8 @@ fn parse_key_code(number: u16) -> Key {
         9 => Key::Num8,
         10 => Key::Num9,
         11 => Key::Num0,
-        12 => Key::Unicode('-'),
-        13 => Key::Unicode('='),
+        12 => Key::Minus,
+        13 => Key::Equals,
         14 => Key::Backspace,
         15 => Key::Tab,
         16 => Key::Q,
@@ -181,8 +180,8 @@ fn parse_key_code(number: u16) -> Key {
         23 => Key::I,
         24 => Key::O,
         25 => Key::P,
-        26 => Key::Unicode('['),
-        27 => Key::Unicode(']'),
+        26 => Key::LeftBracket,
+        27 => Key::RightBracket,
         28 => Key::Return,
         29 => Key::LControl,
         30 => Key::A,
@@ -192,13 +191,13 @@ fn parse_key_code(number: u16) -> Key {
         34 => Key::G,
         35 => Key::H,
         36 => Key::J,
-        37 => Key::L,
+        37 => Key::K,
         38 => Key::L,
-        39 => Key::Unicode(';'),
-        40 => Key::Unicode('\''),
-        41 => Key::Unicode('`'),
+        39 => Key::Semicolon,
+        40 => Key::Apostrophe,
+        41 => Key::BackQuote,
         42 => Key::LShift,
-        43 => Key::Unicode('\\'),
+        43 => Key::Backslash,
         44 => Key::Z,
         45 => Key::X,
         46 => Key::C,
@@ -206,9 +205,9 @@ fn parse_key_code(number: u16) -> Key {
         48 => Key::B,
         49 => Key::N,
         50 => Key::M,
-        51 => Key::Unicode(','),
-        52 => Key::Unicode('.'),
-        53 => Key::Unicode('/'),
+        51 => Key::Comma,
+        52 => Key::Period,
+        53 => Key::Slash,
         55 => Key::Multiply,
         57 => Key::Space,
         58 => Key::CapsLock,
@@ -223,7 +222,7 @@ fn parse_key_code(number: u16) -> Key {
         67 => Key::F9,
         68 => Key::F10,
         69 => Key::Numlock,
-        70 => Key::Scroll,
+        70 => Key::ScrollLock,
         71 => Key::Numpad7,
         72 => Key::Numpad8,
         73 => Key::Numpad9,
@@ -242,7 +241,7 @@ fn parse_key_code(number: u16) -> Key {
         100 => Key::F13,
         101 => Key::F14,
         102 => Key::F15,
-        156 => Key::Separator,
+        156 => Key::NumpadEnter,
         157 => Key::RControl,
         181 => Key::Divide,
         183 => Key::PrintScr,
@@ -259,8 +258,120 @@ fn parse_key_code(number: u16) -> Key {
         219 => Key::LWin,
         220 => Key::RWin,
         221 => Key::Apps,
-        e => todo!("Unmatched key code {}", e),
+        e => {
+            error!("Unmatched keycode in keyfile: {}", e);
+            Key::Unknown
+        }
     };
+}
+
+/// Keys that are used in falcon bms key files
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Key {
+    Unknown,
+    Escape,
+    Num1,
+    Num2,
+    Num3,
+    Num4,
+    Num5,
+    Num6,
+    Num7,
+    Num8,
+    Num9,
+    Num0,
+    Minus,
+    Equals,
+    Backspace,
+    Tab,
+    Q,
+    W,
+    E,
+    R,
+    T,
+    Y,
+    U,
+    I,
+    O,
+    P,
+    LeftBracket,
+    RightBracket,
+    Return,
+    LControl,
+    A,
+    S,
+    D,
+    F,
+    G,
+    H,
+    J,
+    K,
+    L,
+    Semicolon,
+    Apostrophe,
+    BackQuote,
+    LShift,
+    Backslash,
+    Z,
+    X,
+    C,
+    V,
+    B,
+    N,
+    M,
+    Comma,
+    Period,
+    Slash,
+    Multiply,
+    Space,
+    CapsLock,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    Numlock,
+    ScrollLock,
+    Numpad7,
+    Numpad8,
+    Numpad9,
+    Subtract,
+    Numpad4,
+    Numpad5,
+    Numpad6,
+    Add,
+    Numpad1,
+    Numpad2,
+    Numpad3,
+    Numpad0,
+    Decimal,
+    F11,
+    F12,
+    F13,
+    F14,
+    F15,
+    NumpadEnter,
+    RControl,
+    Divide,
+    PrintScr,
+    Home,
+    UpArrow,
+    PageUp,
+    LeftArrow,
+    RightArrow,
+    End,
+    DownArrow,
+    PageDown,
+    Insert,
+    Delete,
+    LWin,
+    RWin,
+    Apps,
 }
 
 #[cfg(test)]
@@ -281,7 +392,7 @@ mod falcon_key_file {
 
     #[test]
     fn parse_basic_key_file() {
-        let path = Path::new("src/lib/falcon-key-file/test-data/basic.key");
+        let path = Path::new("test-data/basic.key");
         let file = File::open(&path).unwrap();
         let result = parse(String::from("basic.key"), &file);
         assert!(result.is_ok());
@@ -300,10 +411,10 @@ mod falcon_key_file {
         assert_eq!(callback.modifiers, vec![]);
 
         let callback = result.callback("OTWBalanceIVCvsAIUp").unwrap();
-        assert_eq!(callback.readable_key_code, Key::Unicode(']'));
+        assert_eq!(callback.readable_key_code, Key::RightBracket);
 
         let callback = result.callback("OTWBalanceIVCvsAIDown").unwrap();
-        assert_eq!(callback.readable_key_code, Key::Unicode('['));
+        assert_eq!(callback.readable_key_code, Key::LeftBracket);
 
         // let's find one with multiple modifiers
         let callback = result.callback("AFElevatorUp").unwrap();
@@ -335,7 +446,7 @@ mod falcon_key_file {
         let env = Env::default().filter_or("LOG_LEVEL", "debug");
         env_logger::init_from_env(env);
 
-        let path = Path::new("src/lib/falcon-key-file/test-data/T16000M-FCS-Full.key");
+        let path = Path::new("test-data/T16000M-FCS-Full.key");
         let file = File::open(&path).unwrap();
         let result = parse(String::from("T16000M-FCS-Full.key"), &file);
         assert!(result.is_ok());
@@ -347,14 +458,14 @@ mod falcon_key_file {
         assert!(callback.is_some());
         let callback = callback.unwrap();
         println!("{:?}", callback);
-        assert_eq!(callback.readable_key_code, Key::Unicode('/'));
+        assert_eq!(callback.readable_key_code, Key::Slash);
         assert_eq!(callback.modifiers, vec![Modifier::LSHIFT]);
 
         // let's find the problematic new ones
         let callback = result.callback("SimMIDSLVTInc");
         assert!(callback.is_some());
         let callback = callback.unwrap();
-        assert_eq!(callback.readable_key_code, Key::Unicode('/'));
+        assert_eq!(callback.readable_key_code, Key::Slash);
         assert_eq!(callback.modifiers, vec![Modifier::LSHIFT, Modifier::LALT]);
     }
 }
